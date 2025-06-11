@@ -1,0 +1,3 @@
+[submodule "scientific-papers-enhancer-webapi"]
+	path = scientific-papers-enhancer-webapi
+	url = https://gitlab.com/musa_islamov/scientific-papers-enhancer.git
