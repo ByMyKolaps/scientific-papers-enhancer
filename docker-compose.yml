@@ -1,0 +1,53 @@
+services:
+  postgres:
+      container_name: ml_project_postgres
+      image: postgres:17.2
+      command: -c logging_collector=on -c log_destination=csvlog
+      restart: always
+      ports:
+        - "5431:5432"
+      env_file:
+        - scientific-papers-enhancer-webapi/env-local.env
+      volumes:
+        - pgdata:/var/lib/postgresql/data
+      networks:
+        - project_network
+
+  ml_project_backend:
+    container_name: ml_project_backend
+    image: ml_project_backend
+    build:
+      context: ./scientific-papers-enhancer-webapi
+    env_file:
+      - scientific-papers-enhancer-webapi/env-local.env
+    command: uv run uvicorn main:app --reload --proxy-headers --forwarded-allow-ips=* --host 0.0.0.0 --port 8000 --no-access-log
+    volumes:
+      - ./src:/var/www/app/src
+    ports:
+      - "8004:8000"
+    depends_on:
+      - postgres
+    networks:
+      - project_network
+
+  ml_project_frontend:
+    container_name: ml_project_frontend
+    environment:
+      - API_URL=http://ml_project_backend:8000/enhance
+    build:
+      context: ./scientific-papers-enhancer-frontend  # Указываем путь к фронту
+    env_file:
+      - scientific-papers-enhancer-frontend/.env
+    ports:
+      - "8501:8501"
+    depends_on:
+      - ml_project_backend
+    networks:
+      - project_network
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  project_network:
