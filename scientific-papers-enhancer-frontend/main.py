@@ -1,8 +1,15 @@
+from dotenv import load_dotenv
+import os
 import streamlit as st
 import requests
 import pyperclip
 from datetime import datetime
-from config import API_URL, MAX_WORDS
+
+# Загрузка конфигурации
+load_dotenv()
+
+API_URL = os.getenv("API_URL")
+MAX_WORDS = int(os.getenv("MAX_WORDS"))
 
 st.title("Автоматическое улучшение научных текстов")
 
